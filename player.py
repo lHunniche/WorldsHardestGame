@@ -4,12 +4,13 @@ RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
 class Player:
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.size = 28
+    def __init__(self, spawn):
+        self.x = spawn[0]
+        self.y = spawn[1]
+        self.size = 36
+        self.gap = 10
         self.speed = 3
-        self.red_rect = pygame.Rect(self.x+4, self.y+4, self.size-8, self.size-8)
+        self.red_rect = pygame.Rect(self.x+self.gap/2, self.y+self.gap/2, self.size-self.gap, self.size-self.gap)
         self.black_rect = pygame.Rect(self.x, self.y, self.size, self.size)
     
     def draw(self, screen):
