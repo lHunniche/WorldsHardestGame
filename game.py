@@ -45,8 +45,8 @@ def play():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 keep_playing = False
-            if event.type == pygame.KEYDOWN:
-                handle_keydown_event(event, screen)
+            #if event.type == pygame.KEYDOWN:
+            #    handle_keydown_event(event, screen)
 
 
         # game logic here
@@ -58,6 +58,7 @@ def play():
         screen.fill(COLOR_BACKGROUND)
         LEVELS[current_level_index].draw(screen)
         player.draw(screen)
+        #pygame.draw.line(screen, (0,0,0), (5,5), (100,5),7)
         
         
         # update screen

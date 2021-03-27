@@ -14,6 +14,10 @@ FLOOR_WHITE = (255, 255, 255)
 FLOOR_START = (149, 245, 132)
 FLOOR_END = (149, 245, 132)
 FLOOR_WALL = (0, 0, 0)
+TILE_SIZE = 50
+WB = WALL_BUFFER = 2
+
+WALL_THICKNESS = 6
 
 
 class Tile:
@@ -21,9 +25,19 @@ class Tile:
         self.rect = rect
         self.color = color
         self.type = type
+        self.wall_up = False
+        self.wall_down = False
+        self.wall_left = False
+        self.wall_right = False
+        self.has_walls = False
 
     def __repr__(self):
         return str(self.type)
+
+
+
+
+
 
 
 class Level:
@@ -33,7 +47,7 @@ class Level:
         self.tiles_width = 26
         self.left = 50
         self.top = 50
-        self.tile_size = 50
+        self.tile_size = TILE_SIZE
         self.tile_array = []
         self.spawn = (0, 0)
 
@@ -46,13 +60,13 @@ class Level:
         for counter in range(self.tiles_height):
             self.tile_array[counter] = [None] * self.tiles_width
 
-        self.generate_walls()
 
         for y_pos in range(self.tiles_height):
             for x_pos in range(self.tiles_width):
                 if self.layout[y_pos][x_pos] is not NOTHING:
                     self.tile_array[y_pos][x_pos] = self.create_tile(self.layout[y_pos][x_pos], y_pos, x_pos)
 
+        self.flag_walls()
         
 
 
@@ -108,24 +122,54 @@ class Level:
         return True
 
 
-    def generate_walls(self):
+    def flag_walls(self):
         for y_pos in range(self.tiles_height):
             for x_pos in range(self.tiles_width):
-                if self.layout[y_pos][x_pos] != NOTHING and self.layout[y_pos][x_pos] != WALL:
-                    neighbors = [(y_pos-1, x_pos), (y_pos+1, x_pos), (y_pos, x_pos-1), (y_pos, x_pos+1)]
-                    for indices in neighbors:
-                        if indices[0] < 0 or indices[1] < 0 or indices[0] >= self.tiles_height or indices[1] >= self.tiles_width: # only look within boundaries
-                            continue
-                        if self.layout[indices[0]][indices[1]] == NOTHING: # find tile that is None
-                            self.layout[indices[0]][indices[1]] = WALL # make it a wall
+                if self.tile_array[y_pos][x_pos] is not None: #and self.tile_array[y_pos][x_pos] != WALL:
+                    up = (y_pos-1, x_pos)
+                    down = (y_pos+1, x_pos)
+                    left = (y_pos, x_pos-1)
+                    right = (y_pos, x_pos+1)
+                    current_tile = self.tile_array[y_pos][x_pos]
+                    if self.tile_array[left[0]][left[1]] is None:
+                        current_tile.has_walls = True
+                        current_tile.wall_left = True
+                    if self.tile_array[right[0]][right[1]] is None:
+                        current_tile.has_walls = True
+                        current_tile.wall_right = True
+                    if self.tile_array[up[0]][up[1]] is None:
+                        current_tile.has_walls = True
+                        current_tile.wall_up = True
+                    if self.tile_array[down[0]][down[1]] is None:
+                        current_tile.has_walls = True
+                        current_tile.wall_down = True
+
 
 
     def draw(self, screen):
-        #print(np.matrix(self.tile_array))
         for column in self.tile_array:
             for tile in column:
                 if tile is not None:
                     pygame.draw.rect(screen, tile.color, tile.rect)
+        for column in self.tile_array:
+            for tile in column:
+                if tile is not None:
+                    x = tile.rect.x 
+                    y = tile.rect.y
+                    tl = tile.rect.topleft
+                    tr = tile.rect.topright
+                    bl = tile.rect.bottomleft
+                    br = tile.rect.bottomright
+                    if tile.wall_up:
+                        pygame.draw.line(screen, FLOOR_WALL, tl, tr, WALL_THICKNESS)
+                    if tile.wall_down:
+                        pygame.draw.line(screen, FLOOR_WALL, bl, br, WALL_THICKNESS)
+                    if tile.wall_left:
+                        pygame.draw.line(screen, FLOOR_WALL, tl, bl, WALL_THICKNESS)
+                    if tile.wall_right:
+                        pygame.draw.line(screen, FLOOR_WALL, tr, br, WALL_THICKNESS)
+
+                    
 
 
 
