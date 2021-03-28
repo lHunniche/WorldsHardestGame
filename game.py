@@ -2,7 +2,7 @@
 import pygame
 import random
 from player import Player
-from level import Level, LevelGen
+from level import Level, LevelGen, WALL
 
 
 clock = pygame.time.Clock()
@@ -51,8 +51,7 @@ def play():
 
         # game logic here
         keys = pygame.key.get_pressed()
-        player.move(keys)
-
+        player.move(keys, LEVELS[current_level_index])
 
         # drawing goes here
         screen.fill(COLOR_BACKGROUND)

@@ -15,12 +15,20 @@ FLOOR_START = (149, 245, 132)
 FLOOR_END = (149, 245, 132)
 FLOOR_WALL = (0, 0, 0)
 
+WT = WALL_THICKNESS = 7
+WB = WT//2
+WBB = WB*2
+
 
 class Tile:
     def __init__(self, rect, color, type):
         self.rect = rect
         self.color = color
         self.type = type
+        self.wall_up = False
+        self.wall_down = False
+        self.wall_left = False
+        self.wall_right = False
 
     def __repr__(self):
         return str(self.type)
@@ -53,8 +61,9 @@ class Level:
                 if self.layout[y_pos][x_pos] is not NOTHING:
                     self.tile_array[y_pos][x_pos] = self.create_tile(self.layout[y_pos][x_pos], y_pos, x_pos)
 
-        
+        self.mark_where_walls_draw()
 
+    
 
     def create_tile(self, tile_type, y_pos, x_pos):
         # Rect(left, top, width, height)
@@ -97,15 +106,6 @@ class Level:
             rect = pygame.Rect(left, top, width, height)
             color = FLOOR_END
             return Tile(rect, color, tile_type)
-    
-
-    def is_valid_layout(self):
-        if len(self.layout) != 19:
-            return False
-        for row in self.layout:
-            if len(row) != 26:
-                return False
-        return True
 
 
     def generate_walls(self):
@@ -120,12 +120,57 @@ class Level:
                             self.layout[indices[0]][indices[1]] = WALL # make it a wall
 
 
+    def mark_where_walls_draw(self):
+        for y_pos in range(self.tiles_height):
+            for x_pos in range(self.tiles_width):
+                tile = self.tile_array[y_pos][x_pos]
+                if tile is not None and tile.type == WALL:
+                    above = (y_pos-1, x_pos)
+                    above = self.tile_array[above[0]][above[1]]
+                    below = (y_pos+1, x_pos)
+                    below = self.tile_array[below[0]][below[1]]
+                    left = (y_pos, x_pos-1)
+                    left = self.tile_array[left[0]][left[1]]
+                    right = (y_pos, x_pos+1)
+                    right = self.tile_array[right[0]][right[1]]
+
+                    tile.wall_up = above is not None and above.type != WALL
+                    tile.wall_down = below is not None and below.type != WALL
+                    tile.wall_left = left is not None and left.type != WALL
+                    tile.wall_right = right is not None and right.type != WALL
+
+
+    def is_valid_layout(self):
+        if len(self.layout) != 19:
+            return False
+        for row in self.layout:
+            if len(row) != 26:
+                return False
+        return True
+
+
     def draw(self, screen):
-        #print(np.matrix(self.tile_array))
+        for column in self.tile_array:
+            for tile in column:
+                if tile is not None and tile.type == WALL:
+                    rect = tile.rect
+                    if tile.wall_up:
+                        pygame.draw.line(screen, FLOOR_WALL, (rect.left-WBB, rect.top+WB), (rect.right+WBB, rect.top+WB), WT)
+                    if tile.wall_down:
+                        pygame.draw.line(screen, FLOOR_WALL, (rect.left-WBB, rect.bottom-WB), (rect.right+WBB, rect.bottom-WB), WT)
+                    if tile.wall_left:
+                        pygame.draw.line(screen, FLOOR_WALL, (rect.left+WB, rect.top-WBB), (rect.left+WB, rect.bottom+WBB), WT)
+                    if tile.wall_right:
+                        pygame.draw.line(screen, FLOOR_WALL, (rect.right-WB, rect.top-WBB), (rect.right-WB, rect.bottom+WBB), WT)
+                        
         for column in self.tile_array:
             for tile in column:
                 if tile is not None:
-                    pygame.draw.rect(screen, tile.color, tile.rect)
+                    if tile.type != WALL:
+                        pygame.draw.rect(screen, tile.color, tile.rect)
+                        
+
+                
 
 
 
