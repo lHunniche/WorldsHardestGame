@@ -15,7 +15,10 @@ WHITE = (255, 255, 255)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 COLOR_BACKGROUND = (190, 173, 255)
+YELLOW = (255, 255, 0)
+ENEMY_BLUE = (0, 69, 232)
 LEVELS = []
+enemy_level = None
 
 
 def handle_keydown_event(event, screen):
@@ -28,10 +31,28 @@ def handle_keydown_event(event, screen):
         print("Drawn")
 
 
+def draw_an_enemy(screen):
+    enemy_rect = pygame.Rect(0,0, 20, 20)
+    enemy_rect.center = (475, 475)
+    pygame.draw.circle(screen, BLACK, enemy_rect.center, 13)
+    pygame.draw.circle(screen, ENEMY_BLUE, enemy_rect.center, 7)
+
+
 def init_levels():
-    global LEVELS
+    global LEVELS, enemy_level
+    import enemy
     #LEVELS.append(Level(LevelGen.all_floor()))
-    LEVELS.append(Level(LevelGen.level_1()))
+    LEVELS.append(Level(LevelGen.level_1()).set_enemies(enemy.level_one()))
+    
+    #enemy_level = enemy.level_one()
+
+
+def draw_enemies(screen):
+    print("Enemy count: {}".format(len(enemy_level.enemies)))
+    for enemy in enemy_level.enemies:
+        pygame.draw.circle(screen, enemy.outer_color, enemy.rect.center, enemy.outer_radius)
+        pygame.draw.circle(screen, enemy.inner_color, enemy.rect.center, enemy.inner_radius)
+
 
 def play():
     keep_playing = True
@@ -57,6 +78,9 @@ def play():
         screen.fill(COLOR_BACKGROUND)
         LEVELS[current_level_index].draw(screen)
         player.draw(screen)
+        #draw_enemies(screen)
+
+        #print("Y: {} - X: {}".format(player.black_rect.centery, player.black_rect.centerx))
         
         
         # update screen

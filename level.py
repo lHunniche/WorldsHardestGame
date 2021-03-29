@@ -44,8 +44,13 @@ class Level:
         self.tile_size = 50
         self.tile_array = []
         self.spawn = (0, 0)
-
         self.make_rect_array()
+        self.enemies = None
+
+    def set_enemies(self, enemies):
+        self.enemies = enemies
+        return self
+
     
     def make_rect_array(self):
         if not self.is_valid_layout():
@@ -168,6 +173,10 @@ class Level:
                 if tile is not None:
                     if tile.type != WALL:
                         pygame.draw.rect(screen, tile.color, tile.rect)
+
+        for enemy in self.enemies:
+            pygame.draw.circle(screen, enemy.outer_color, enemy.rect.center, enemy.outer_radius)
+            pygame.draw.circle(screen, enemy.inner_color, enemy.rect.center, enemy.inner_radius)
                         
 
                 
@@ -200,6 +209,7 @@ class LevelGen:
             [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
             [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
         ]
+
 
     @classmethod
     def all_floor(cls):
