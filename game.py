@@ -22,13 +22,14 @@ enemy_level = None
 
 
 def handle_keydown_event(event, screen):
-    if event.key == pygame.K_SPACE:
-        first_rect = pygame.Rect(200, 200, 50, 50)
-        second_rect = pygame.Rect(225, 255, 50, 50)
-        pygame.draw.rect(screen, GREEN, first_rect)
-        pygame.draw.rect(screen, GREEN, second_rect)
-        pygame.display.flip()
-        print("Drawn")
+    pass
+    #if event.key == pygame.K_SPACE:
+        #first_rect = pygame.Rect(200, 200, 50, 50)
+        #second_rect = pygame.Rect(225, 255, 50, 50)
+        #pygame.draw.rect(screen, GREEN, first_rect)
+        #pygame.draw.rect(screen, GREEN, second_rect)
+        #pygame.display.flip()
+        #print("Drawn")
 
 
 def draw_an_enemy(screen):
@@ -73,6 +74,8 @@ def play():
         # game logic here
         keys = pygame.key.get_pressed()
         player.move(keys, LEVELS[current_level_index])
+        LEVELS[current_level_index].move_enemies()
+        LEVELS[current_level_index].check_collision_with_player(player)
 
         # drawing goes here
         screen.fill(COLOR_BACKGROUND)

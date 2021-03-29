@@ -60,3 +60,10 @@ class Player:
                             self.black_rect.top = tile.rect.bottom
                         if self.black_rect.bottom < tile.rect.bottom: # player is above
                             self.black_rect.bottom = tile.rect.top
+
+    def move_to_abs_pos(self, x, y):
+        self.black_rect.centerx = x
+        self.black_rect.centery = y
+        self.red_rect.left = self.black_rect.x+self.gap/2
+        self.red_rect.top = self.black_rect.y+self.gap/2
+

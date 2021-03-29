@@ -154,6 +154,26 @@ class Level:
         return True
 
 
+    def move_enemies(self):
+        for enemy in self.enemies:
+            enemy.move()
+
+    def check_collision_with_player(self, player):
+        '''
+        small buffer added below... maybe reconsider implementation later?
+        '''
+        player_collide_rect = player.red_rect.copy()
+        player_collide_rect.width = player.red_rect.width + 5
+        player_collide_rect.height = player.red_rect.height + 5
+        player_collide_rect.center = player.red_rect.center
+
+        for enemy in self.enemies:
+            if player_collide_rect.colliderect(enemy.rect):
+                player.move_to_abs_pos(self.spawn[0], self.spawn[1])
+                break
+
+
+
     def draw(self, screen):
         for column in self.tile_array:
             for tile in column:
@@ -177,6 +197,7 @@ class Level:
         for enemy in self.enemies:
             pygame.draw.circle(screen, enemy.outer_color, enemy.rect.center, enemy.outer_radius)
             pygame.draw.circle(screen, enemy.inner_color, enemy.rect.center, enemy.inner_radius)
+            #pygame.draw.rect(screen, enemy.outer_color, enemy.rect)
                         
 
                 
