@@ -2,13 +2,17 @@
 import pygame
 import random
 from player import Player
-from level import Level, LevelGen, WALL
+from level import Level, LevelGen
 
+pygame.font.init()
+myfont = pygame.font.SysFont('Tahoma', 50)
 
 clock = pygame.time.Clock()
-size = (1400, 1050) #1400×1050
+width, height = 1400, 1050
+size = (width, height) #1400×1050
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Worlds Hardest Game")
+
 
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -19,6 +23,10 @@ YELLOW = (255, 255, 0)
 ENEMY_BLUE = (0, 69, 232)
 LEVELS = []
 enemy_level = None
+
+STATE_PLAYING = 0
+STATE_CHANGING_LEVELS = 1
+STATE_MENU = 2
 
 
 def handle_keydown_event(event, screen):
@@ -44,23 +52,20 @@ def init_levels():
     import enemy
     #LEVELS.append(Level(LevelGen.all_floor()))
     LEVELS.append(Level(LevelGen.level_1()).set_enemies(enemy.level_one()))
-    
-    #enemy_level = enemy.level_one()
-
-
-def draw_enemies(screen):
-    print("Enemy count: {}".format(len(enemy_level.enemies)))
-    for enemy in enemy_level.enemies:
-        pygame.draw.circle(screen, enemy.outer_color, enemy.rect.center, enemy.outer_radius)
-        pygame.draw.circle(screen, enemy.inner_color, enemy.rect.center, enemy.inner_radius)
+    LEVELS.append(Level(LevelGen.level_2()).set_enemies([]))
 
 
 def play():
+    from soundfx import SoundFX
+    #SoundFX.music.play()
+
     keep_playing = True
     current_level_index = 0
     player = Player(LEVELS[current_level_index].spawn)
+    current_state = STATE_CHANGING_LEVELS
+    text_surface = myfont.render('Get Ready', False, (0, 0, 0))
+    text_counter = 0
     
-
 
     while keep_playing:
         # main event loop
@@ -70,22 +75,31 @@ def play():
             if event.type == pygame.KEYDOWN:
                 handle_keydown_event(event, screen)
 
+        if current_state == STATE_CHANGING_LEVELS:
+            if text_counter < 180:
+                screen.fill(COLOR_BACKGROUND)
+                screen.blit(text_surface,(width/2-100, height/2-100))
+                text_counter += 1
+            else:
+                current_state = STATE_PLAYING
 
-        # game logic here
-        keys = pygame.key.get_pressed()
-        player.move(keys, LEVELS[current_level_index])
-        LEVELS[current_level_index].move_enemies()
-        LEVELS[current_level_index].check_collision_with_player(player)
+        elif current_state == STATE_PLAYING:
+            # game logic here
+            keys = pygame.key.get_pressed()
+            player.move(keys, LEVELS[current_level_index])
+            LEVELS[current_level_index].move_enemies()
+            LEVELS[current_level_index].check_collision_with_player(player)
+            if LEVELS[current_level_index].player_reached_goal(player):
+                current_level_index += 1
+                player = Player(LEVELS[current_level_index].spawn)
+                continue
 
-        # drawing goes here
-        screen.fill(COLOR_BACKGROUND)
-        LEVELS[current_level_index].draw(screen)
-        player.draw(screen)
-        #draw_enemies(screen)
+            # drawing goes here
+            screen.fill(COLOR_BACKGROUND)
+            LEVELS[current_level_index].draw(screen)
+            player.draw(screen)
 
-        #print("Y: {} - X: {}".format(player.black_rect.centery, player.black_rect.centerx))
-        
-        
+    
         # update screen
         pygame.display.flip()
 

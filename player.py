@@ -8,21 +8,22 @@ class Player:
     def __init__(self, spawn):
         self.x = spawn[0]
         self.y = spawn[1]
-        self.size = 36
+        self.size = 40
         self.gap = 10
         self.speed = 3
         self.red_rect = pygame.Rect(self.x+self.gap/2, self.y+self.gap/2, self.size-self.gap, self.size-self.gap)
         self.black_rect = pygame.Rect(self.x, self.y, self.size, self.size)
+        self.dead = False
     
     def draw(self, screen):
         pygame.draw.rect(screen, BLACK, self.black_rect)
         pygame.draw.rect(screen, RED, self.red_rect)
 
     def move(self, keys, level):
-        move_left = keys[pygame.K_a]
-        move_right = keys[pygame.K_d]
-        move_up = keys[pygame.K_w]
-        move_down = keys[pygame.K_s]
+        move_left = keys[pygame.K_a] or keys[pygame.K_LEFT]
+        move_right = keys[pygame.K_d] or keys[pygame.K_RIGHT]
+        move_up = keys[pygame.K_w] or keys[pygame.K_UP]
+        move_down = keys[pygame.K_s] or keys[pygame.K_DOWN]
 
         x_motion = move_left * (self.speed * -1) + move_right * self.speed
         y_motion = move_up * (self.speed * -1) + move_down * self.speed

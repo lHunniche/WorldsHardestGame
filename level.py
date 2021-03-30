@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+from soundfx import SoundFX
 
 
 _ = NOTHING = 0
@@ -18,6 +19,8 @@ FLOOR_WALL = (0, 0, 0)
 WT = WALL_THICKNESS = 7
 WB = WT//2
 WBB = WB*2
+
+
 
 
 class Tile:
@@ -159,17 +162,10 @@ class Level:
             enemy.move()
 
     def check_collision_with_player(self, player):
-        '''
-        small buffer added below... maybe reconsider implementation later?
-        '''
-        player_collide_rect = player.red_rect.copy()
-        player_collide_rect.width = player.red_rect.width + 5
-        player_collide_rect.height = player.red_rect.height + 5
-        player_collide_rect.center = player.red_rect.center
-
         for enemy in self.enemies:
-            if player_collide_rect.colliderect(enemy.rect):
+            if player.red_rect.colliderect(enemy.rect):
                 player.move_to_abs_pos(self.spawn[0], self.spawn[1])
+                SoundFX.player_hit.play()
                 break
 
 
@@ -197,7 +193,15 @@ class Level:
         for enemy in self.enemies:
             pygame.draw.circle(screen, enemy.outer_color, enemy.rect.center, enemy.outer_radius)
             pygame.draw.circle(screen, enemy.inner_color, enemy.rect.center, enemy.inner_radius)
-            #pygame.draw.rect(screen, enemy.outer_color, enemy.rect)
+
+
+    def player_reached_goal(self, player):
+        for column in self.tile_array:
+            for tile in column:
+                if tile is not None and tile.type == END:
+                    if player.black_rect.colliderect(tile.rect):
+                        return True
+        return False
                         
 
                 
@@ -205,6 +209,32 @@ class Level:
 
 
 class LevelGen:
+
+    @classmethod
+    def template(cls):
+        return [
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+        ]
+
 
     @classmethod
     def level_1(cls):
@@ -230,6 +260,32 @@ class LevelGen:
             [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
             [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
         ]
+
+    @classmethod
+    def level_2(cls):
+        return [
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, F, F, F, F, F, F,     F, F, F, F, F, F, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, F, F, F, F, F, F,     F, F, F, F, F, F, _, _, _, _, _, _, _],
+            [_, _, _, _, S, P, S, F, F, F, F, F, F,     F, F, F, F, F, F, E, E, E, _, _, _, _],
+
+            [_, _, _, _, S, S, S, F, F, F, F, F, F,     F, F, F, F, F, F, E, E, E, _, _, _, _],
+            [_, _, _, _, _, _, _, F, F, F, F, F, F,     F, F, F, F, F, F, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, F, F, F, F, F, F,     F, F, F, F, F, F, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
+        ]
+
 
 
     @classmethod
