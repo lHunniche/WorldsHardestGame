@@ -48,10 +48,16 @@ class Level:
         self.tile_array = []
         self.spawn = (0, 0)
         self.make_rect_array()
-        self.enemies = None
+        self.enemies = []
+        self.coins = []
+
 
     def set_enemies(self, enemies):
         self.enemies = enemies
+        return self
+
+    def set_coins(self, coins):
+        self.coins = coins
         return self
 
     
@@ -168,9 +174,17 @@ class Level:
                 SoundFX.player_hit.play()
                 break
 
+    def check_collision_with_coin(self, player):
+        remaining_coins = []
+        for coin in self.coins:
+            if not player.black_rect.colliderect(coin.rect):
+                remaining_coins.append(coin)
+        self.coins = remaining_coins
 
 
-    def draw(self, screen):
+
+
+    def draw_level(self, screen):
         for column in self.tile_array:
             for tile in column:
                 if tile is not None and tile.type == WALL:
@@ -193,6 +207,10 @@ class Level:
         for enemy in self.enemies:
             pygame.draw.circle(screen, enemy.outer_color, enemy.rect.center, enemy.outer_radius)
             pygame.draw.circle(screen, enemy.inner_color, enemy.rect.center, enemy.inner_radius)
+
+        for coin in self.coins:
+            pygame.draw.circle(screen, coin.outer_color, coin.rect.center, coin.outer_radius)
+            pygame.draw.circle(screen, coin.inner_color, coin.rect.center, coin.inner_radius)
 
 
     def player_reached_goal(self, player):

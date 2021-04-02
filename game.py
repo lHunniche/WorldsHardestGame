@@ -4,6 +4,7 @@ import random
 from player import Player
 from level import Level, LevelGen
 
+
 pygame.font.init()
 myfont = pygame.font.SysFont('Tahoma', 50)
 
@@ -22,7 +23,7 @@ COLOR_BACKGROUND = (190, 173, 255)
 YELLOW = (255, 255, 0)
 ENEMY_BLUE = (0, 69, 232)
 LEVELS = []
-enemy_level = None
+TEXT_FRAMES = 5
 
 STATE_PLAYING = 0
 STATE_CHANGING_LEVELS = 1
@@ -50,9 +51,11 @@ def draw_an_enemy(screen):
 def init_levels():
     global LEVELS, enemy_level
     import enemy
-    #LEVELS.append(Level(LevelGen.all_floor()))
-    LEVELS.append(Level(LevelGen.level_1()).set_enemies(enemy.level_one()))
-    LEVELS.append(Level(LevelGen.level_2()).set_enemies([]))
+    import coin
+    #LEVELS.append(Level(LevelGen.level_1()).set_enemies(enemy.level_one()))
+    LEVELS.append(Level(LevelGen.level_2()).set_enemies(enemy.level_two()).set_coins(coin.level_two()))
+
+    LEVELS.append(Level(LevelGen.all_floor()).set_enemies([]))
 
 
 def play():
@@ -76,7 +79,7 @@ def play():
                 handle_keydown_event(event, screen)
 
         if current_state == STATE_CHANGING_LEVELS:
-            if text_counter < 180:
+            if text_counter < TEXT_FRAMES:
                 screen.fill(COLOR_BACKGROUND)
                 screen.blit(text_surface,(width/2-100, height/2-100))
                 text_counter += 1
@@ -89,6 +92,8 @@ def play():
             player.move(keys, LEVELS[current_level_index])
             LEVELS[current_level_index].move_enemies()
             LEVELS[current_level_index].check_collision_with_player(player)
+            LEVELS[current_level_index].check_collision_with_coin(player)
+
             if LEVELS[current_level_index].player_reached_goal(player):
                 current_level_index += 1
                 player = Player(LEVELS[current_level_index].spawn)
@@ -96,8 +101,9 @@ def play():
 
             # drawing goes here
             screen.fill(COLOR_BACKGROUND)
-            LEVELS[current_level_index].draw(screen)
+            LEVELS[current_level_index].draw_level(screen)
             player.draw(screen)
+            print("X: {} - Y: {}".format(player.black_rect.centerx, player.black_rect.centery))
 
     
         # update screen
