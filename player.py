@@ -13,13 +13,43 @@ class Player:
         self.speed = 3
         self.red_rect = pygame.Rect(self.x+self.gap/2, self.y+self.gap/2, self.size-self.gap, self.size-self.gap)
         self.black_rect = pygame.Rect(self.x, self.y, self.size, self.size)
-        self.dead = False
+        self.alive = True
+        self.death_frames = 45
+        self.death_frame_counter = 0
+        self.spawn_coordinates = None
+        self.black_surface = pygame.Surface((self.black_rect.width, self.black_rect.height)) 
+        self.red_surface = pygame.Surface((self.red_rect.width, self.red_rect.height)) 
+
+
     
     def draw(self, screen):
-        pygame.draw.rect(screen, BLACK, self.black_rect)
-        pygame.draw.rect(screen, RED, self.red_rect)
+        if self.alive:
+            pygame.draw.rect(screen, BLACK, self.black_rect)
+            pygame.draw.rect(screen, RED, self.red_rect)
+        else:
+            if self.death_frame_counter != self.death_frames: # render dying player
+               
+                self.black_surface.set_alpha(255 - (self.death_frame_counter*5))
+                self.red_surface.set_alpha(255 - (self.death_frame_counter*5))    
+                self.black_surface.fill(BLACK)
+                self.red_surface.fill(RED)
+                screen.blit(self.black_surface, self.black_rect)
+                screen.blit(self.red_surface, self.red_rect)
+                self.death_frame_counter += 1
+            else:
+                self.death_frame_counter = 0
+                self.alive = True
+                self.move_to_abs_pos(self.spawn_coordinates[0], self.spawn_coordinates[1])
+
+        
+    def flag_as_hit(self, spawn_coordinates):
+        self.alive = False
+        self.spawn_coordinates = spawn_coordinates
+
 
     def move(self, keys, level):
+        if not self.alive:
+            return
         move_left = keys[pygame.K_a] or keys[pygame.K_LEFT]
         move_right = keys[pygame.K_d] or keys[pygame.K_RIGHT]
         move_up = keys[pygame.K_w] or keys[pygame.K_UP]
@@ -61,6 +91,7 @@ class Player:
                             self.black_rect.top = tile.rect.bottom
                         if self.black_rect.bottom < tile.rect.bottom: # player is above
                             self.black_rect.bottom = tile.rect.top
+
 
     def move_to_abs_pos(self, x, y):
         self.black_rect.centerx = x

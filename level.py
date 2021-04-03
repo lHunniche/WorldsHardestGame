@@ -168,19 +168,23 @@ class Level:
             enemy.move()
 
     def check_collision_with_player(self, player):
+        if not player.alive:
+            return
         for enemy in self.enemies:
             if player.red_rect.colliderect(enemy.rect):
-                player.move_to_abs_pos(self.spawn[0], self.spawn[1])
+                player.flag_as_hit(self.spawn)
+                #player.move_to_abs_pos(self.spawn[0], self.spawn[1])
                 SoundFX.player_hit.play()
                 break
 
     def check_collision_with_coin(self, player):
-        remaining_coins = []
-        for coin in self.coins:
-            if not player.black_rect.colliderect(coin.rect):
-                remaining_coins.append(coin)
-        self.coins = remaining_coins
-
+        if not player.alive:
+            return
+        before = len(self.coins)
+        self.coins[:] = [coin for coin in self.coins if not player.black_rect.colliderect(coin.rect)]
+        after = len(self.coins)
+        if before != after:
+            SoundFX.point.play()
 
 
 
@@ -214,6 +218,8 @@ class Level:
 
 
     def player_reached_goal(self, player):
+        if len(self.coins) != 0:
+            return
         for column in self.tile_array:
             for tile in column:
                 if tile is not None and tile.type == END:
@@ -227,6 +233,9 @@ class Level:
 
 
 class LevelGen:
+    level_last_line = 19
+    spawn_last_line = 21
+    skip_lines = [20]
 
     @classmethod
     def template(cls):
@@ -256,6 +265,24 @@ class LevelGen:
 
     @classmethod
     def level_1(cls):
+        level_file = open("levels/level1.txt", "r")
+        line_counter = 0
+        level = []
+        for line in level_file:
+            if line_counter in LevelGen.skip_lines:
+                line_counter += 1
+                #print(line_counter)
+                continue
+            if line_counter < LevelGen.level_last_line:
+                row = list(line)[:-1] # convert String into single element list, skipping the \n in the end
+                row[:] = [int(x) for x in row] # convert all elements to int
+                level.append(row)
+            elif line_counter < LevelGen.spawn_last_line:
+                print(line)
+                print(line_counter)
+            line_counter += 1
+        
+        return level
         return [
             [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
             [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],

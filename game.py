@@ -6,13 +6,14 @@ from level import Level, LevelGen
 
 
 pygame.font.init()
-myfont = pygame.font.SysFont('Tahoma', 50)
+myfont = pygame.font.SysFont('Tahoma', 60)
 
 clock = pygame.time.Clock()
 width, height = 1400, 1050
 size = (width, height) #1400×1050
 screen = pygame.display.set_mode(size)
 pygame.display.set_caption("Worlds Hardest Game")
+
 
 
 BLACK = (0, 0, 0)
@@ -52,7 +53,7 @@ def init_levels():
     global LEVELS, enemy_level
     import enemy
     import coin
-    #LEVELS.append(Level(LevelGen.level_1()).set_enemies(enemy.level_one()))
+    LEVELS.append(Level(LevelGen.level_1()).set_enemies(enemy.level_one()))
     LEVELS.append(Level(LevelGen.level_2()).set_enemies(enemy.level_two()).set_coins(coin.level_two()))
 
     LEVELS.append(Level(LevelGen.all_floor()).set_enemies([]))
@@ -66,7 +67,8 @@ def play():
     current_level_index = 0
     player = Player(LEVELS[current_level_index].spawn)
     current_state = STATE_CHANGING_LEVELS
-    text_surface = myfont.render('Get Ready', False, (0, 0, 0))
+    text_surface = myfont.render('GET READY', False, (0, 0, 0))
+    text_rect = text_surface.get_rect(center=(width//2, height//2))
     text_counter = 0
     
 
@@ -81,7 +83,7 @@ def play():
         if current_state == STATE_CHANGING_LEVELS:
             if text_counter < TEXT_FRAMES:
                 screen.fill(COLOR_BACKGROUND)
-                screen.blit(text_surface,(width/2-100, height/2-100))
+                screen.blit(text_surface, text_rect)
                 text_counter += 1
             else:
                 current_state = STATE_PLAYING
@@ -103,7 +105,7 @@ def play():
             screen.fill(COLOR_BACKGROUND)
             LEVELS[current_level_index].draw_level(screen)
             player.draw(screen)
-            print("X: {} - Y: {}".format(player.black_rect.centerx, player.black_rect.centery))
+            #print("X: {} - Y: {}".format(player.black_rect.centerx, player.black_rect.centery))
 
     
         # update screen
