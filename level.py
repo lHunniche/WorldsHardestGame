@@ -51,15 +51,6 @@ class Level:
         self.enemies = []
         self.coins = []
 
-
-    def set_enemies(self, enemies):
-        self.enemies = enemies
-        return self
-
-    def set_coins(self, coins):
-        self.coins = coins
-        return self
-
     
     def make_rect_array(self):
         if not self.is_valid_layout():
@@ -156,9 +147,11 @@ class Level:
 
     def is_valid_layout(self):
         if len(self.layout) != 19:
+            print("Height is {} - should be 19".format(len(self.layout)))
             return False
         for row in self.layout:
             if len(row) != 26:
+                print("Width is {} - should be 26".format(len(row)))
                 return False
         return True
 
@@ -173,7 +166,6 @@ class Level:
         for enemy in self.enemies:
             if player.red_rect.colliderect(enemy.rect):
                 player.flag_as_hit(self.spawn)
-                #player.move_to_abs_pos(self.spawn[0], self.spawn[1])
                 SoundFX.player_hit.play()
                 break
 
@@ -231,131 +223,94 @@ class Level:
                 
 
 
-
 class LevelGen:
-    level_last_line = 19
-    spawn_last_line = 21
-    skip_lines = [20]
 
     @classmethod
-    def template(cls):
-        return [
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-        ]
+    def load_levels(cls):
+        from os import listdir
+        levels = []
+        for file in listdir("levels"):
+            levels.append(LevelGen.load_level("levels/" + file))
+        return levels
 
 
     @classmethod
-    def level_1(cls):
-        level_file = open("levels/level1.txt", "r")
-        line_counter = 0
-        level = []
-        for line in level_file:
-            if line_counter in LevelGen.skip_lines:
-                line_counter += 1
-                #print(line_counter)
-                continue
-            if line_counter < LevelGen.level_last_line:
-                row = list(line)[:-1] # convert String into single element list, skipping the \n in the end
-                row[:] = [int(x) for x in row] # convert all elements to int
-                level.append(row)
-            elif line_counter < LevelGen.spawn_last_line:
-                print(line)
-                print(line_counter)
-            line_counter += 1
+    def load_level(cls, file):
+        level_file = open(file, "r")
+        lines = level_file.readlines()
+        lines[:] = [line.rstrip('\n') for line in lines]
+        level_layout = []
         
+
+        # LOADING LAYOUT
+        for i in range(0, 19): # the indices of the level layout
+            row = list(lines[i])
+            row[:] = [int(x) for x in row]
+            level_layout.append(row)
+
+        level = Level(level_layout)
+
+        
+        # LOADING SPAWN
+        spawn_x = int(lines[20].split("=")[1].strip())
+        spawn_y = int(lines[21].split("=")[1].strip())
+        level.spawn = (spawn_x, spawn_y)
+
+
+        # LOADING ENEMIES
+        load_enemies = False
+        enemies = []
+        for line in lines:
+            if line == "ENEMIES_START":
+                load_enemies = True
+                continue
+            if line == "ENEMIES_STOP":
+                break
+            if load_enemies:
+                enemy = (LevelGen.extract_enemy(line))
+                if enemy is not None:
+                    enemies.append(enemy)
+        level.enemies = enemies
+
+
+        # LOADING COINS
+        load_coins = False
+        coins = []
+        for line in lines:
+            if line == "COINS_START":
+                load_coins = True
+                continue
+            if line == "COINS_STOP":
+                break
+            if load_coins:
+                coins.append(LevelGen.extract_coin(line))
+        level.coins = coins
+
+
         return level
-        return [
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, S, S, S, S, _, _, _, _, _, _,     _, _, _, _, F, F, E, E, E, E, _, _, _],
-            [_, _, _, S, P, S, S, _, F, F, F, F, F,     F, F, F, F, F, _, E, E, E, E, _, _, _],
-            [_, _, _, S, S, S, S, _, F, F, F, F, F,     F, F, F, F, F, _, E, E, E, E, _, _, _],
-
-            [_, _, _, S, S, S, S, _, F, F, F, F, F,     F, F, F, F, F, _, E, E, E, E, _, _, _],
-            [_, _, _, S, S, S, S, _, F, F, F, F, F,     F, F, F, F, F, _, E, E, E, E, _, _, _],
-            [_, _, _, S, S, S, S, F, F, _, _, _, _,     _, _, _, _, _, _, E, E, E, E, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-        ]
 
     @classmethod
-    def level_2(cls):
-        return [
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, F, F, F, F, F, F,     F, F, F, F, F, F, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, F, F, F, F, F, F,     F, F, F, F, F, F, _, _, _, _, _, _, _],
-            [_, _, _, _, S, P, S, F, F, F, F, F, F,     F, F, F, F, F, F, E, E, E, _, _, _, _],
+    def extract_enemy(cls, line):
+        from enemy import Enemy
+        if len(line) == 0:
+            return None
+        if (list(line)[0] == "#"):
+            return None
+        elements = [l.strip() for l in line.split(":")]
+        paths = elements[:-1]
+        speed = int(elements[-1])
 
-            [_, _, _, _, S, S, S, F, F, F, F, F, F,     F, F, F, F, F, F, E, E, E, _, _, _, _],
-            [_, _, _, _, _, _, _, F, F, F, F, F, F,     F, F, F, F, F, F, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, F, F, F, F, F, F,     F, F, F, F, F, F, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-            [_, _, _, _, _, _, _, _, _, _, _, _, _,     _, _, _, _, _, _, _, _, _, _, _, _, _],
-        ]
+        enemy_paths = []
+        for path in paths:
+            x = int(path.split(",")[0])
+            y = int(path.split(",")[1])
+            enemy_paths.append((x,y))
+        return Enemy(enemy_paths, speed)
 
-
-
+    
     @classmethod
-    def all_floor(cls):
-        return [
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-            [F, F, F, F, F, F, F, F, F, F, F, F, F,     F, F, F, F, F, F, F, F, F, F, F, F, F],
-        ]
-
-
-
+    def extract_coin(cls, line):
+        from coin import Coin
+        x = int(line.split(",")[0])
+        y = int(line.split(",")[1])
+        return Coin(x, y)

@@ -39,24 +39,11 @@ def handle_keydown_event(event, screen):
         #pygame.draw.rect(screen, GREEN, first_rect)
         #pygame.draw.rect(screen, GREEN, second_rect)
         #pygame.display.flip()
-        #print("Drawn")
-
-
-def draw_an_enemy(screen):
-    enemy_rect = pygame.Rect(0,0, 20, 20)
-    enemy_rect.center = (475, 475)
-    pygame.draw.circle(screen, BLACK, enemy_rect.center, 13)
-    pygame.draw.circle(screen, ENEMY_BLUE, enemy_rect.center, 7)
 
 
 def init_levels():
-    global LEVELS, enemy_level
-    import enemy
-    import coin
-    LEVELS.append(Level(LevelGen.level_1()).set_enemies(enemy.level_one()))
-    LEVELS.append(Level(LevelGen.level_2()).set_enemies(enemy.level_two()).set_coins(coin.level_two()))
-
-    LEVELS.append(Level(LevelGen.all_floor()).set_enemies([]))
+    global LEVELS
+    LEVELS = LevelGen.load_levels()[-1:]
 
 
 def play():

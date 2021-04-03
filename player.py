@@ -13,6 +13,8 @@ class Player:
         self.speed = 3
         self.red_rect = pygame.Rect(self.x+self.gap/2, self.y+self.gap/2, self.size-self.gap, self.size-self.gap)
         self.black_rect = pygame.Rect(self.x, self.y, self.size, self.size)
+        self.red_rect.center = (self.x, self.y)
+        self.black_rect.center = (self.x, self.y)
         self.alive = True
         self.death_frames = 45
         self.death_frame_counter = 0
@@ -61,12 +63,12 @@ class Player:
         # move X axis
         self.red_rect.move_ip(x_motion, 0)
         self.black_rect.move_ip(x_motion, 0)
-        self.handle_x_axis_collision(level)
+        #self.handle_x_axis_collision(level)
 
         # move Y axis
         self.red_rect.move_ip(0, y_motion)
         self.black_rect.move_ip(0, y_motion)
-        self.handle_y_axis_collision(level)
+        #self.handle_y_axis_collision(level)
 
         self.red_rect.left = self.black_rect.x+self.gap/2
         self.red_rect.top = self.black_rect.y+self.gap/2
