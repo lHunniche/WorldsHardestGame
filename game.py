@@ -92,7 +92,7 @@ def play():
             screen.fill(COLOR_BACKGROUND)
             LEVELS[current_level_index].draw_level(screen)
             player.draw(screen)
-            #print("X: {} - Y: {}".format(player.black_rect.centerx, player.black_rect.centery))
+            print("X: {} - Y: {}".format(player.black_rect.centerx, player.black_rect.centery))
 
     
         # update screen

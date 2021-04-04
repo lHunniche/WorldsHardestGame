@@ -5,8 +5,8 @@ ENEMY_BLUE = (0, 69, 232)
 
 class Enemy:
     def __init__(self, path, speed):
-        self.outer_radius = 15
-        self.inner_radius = 9
+        self.outer_radius = 13
+        self.inner_radius = 7
         self.speed = speed
 
         self.rect = pygame.Rect(0,0,self.outer_radius*2, self.outer_radius*2)
@@ -29,7 +29,7 @@ class Enemy:
         target_vector = self.vectors[self.target_index]
         direction_vector = (target_vector - self.rect.center).normalize()*self.speed
         self.rect.move_ip(direction_vector)
-        print(direction_vector)
+        #print(direction_vector)
 
         # check if we should switch target vector
         if target_vector.distance_to(self.rect.center) < self.speed:

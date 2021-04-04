@@ -5,8 +5,8 @@ COIN_YELLOW = (255, 213, 0)
 
 class Coin:
     def __init__(self, x, y):
-        self.outer_radius = 15
-        self.inner_radius = 9
+        self.outer_radius = 13
+        self.inner_radius = 7
         self.rect = pygame.Rect(0,0,self.outer_radius*2, self.outer_radius*2)
         self.rect.centerx = x
         self.rect.centery = y

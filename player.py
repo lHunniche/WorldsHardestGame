@@ -8,8 +8,8 @@ class Player:
     def __init__(self, spawn):
         self.x = spawn[0]
         self.y = spawn[1]
-        self.size = 40
-        self.gap = 10
+        self.size = 36
+        self.gap = 12
         self.speed = 3
         self.red_rect = pygame.Rect(self.x+self.gap/2, self.y+self.gap/2, self.size-self.gap, self.size-self.gap)
         self.black_rect = pygame.Rect(self.x, self.y, self.size, self.size)
@@ -63,12 +63,12 @@ class Player:
         # move X axis
         self.red_rect.move_ip(x_motion, 0)
         self.black_rect.move_ip(x_motion, 0)
-        #self.handle_x_axis_collision(level)
+        self.handle_x_axis_collision(level)
 
         # move Y axis
         self.red_rect.move_ip(0, y_motion)
         self.black_rect.move_ip(0, y_motion)
-        #self.handle_y_axis_collision(level)
+        self.handle_y_axis_collision(level)
 
         self.red_rect.left = self.black_rect.x+self.gap/2
         self.red_rect.top = self.black_rect.y+self.gap/2
